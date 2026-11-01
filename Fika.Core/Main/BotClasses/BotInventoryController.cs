@@ -65,12 +65,9 @@ public sealed class BotInventoryController : BaseInventoryController
 
     public override void Execute(EFT.InventoryLogic.Operations.AbstractOperation operation, [CanBeNull] Callback callback)
     {
-#if DEBUG
-        FikaGlobals.LogInfo($"Sending bot operation {operation.GetType()} from {_fikaBot.Profile.Nickname}");
-#endif
+        // Snapshot the descriptor before yielding or executing the operation.
         var packet = new InventoryPacket(_fikaBot.NetId, operation);
-        _fikaBot.PacketSender.NetworkManager.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
-        HandleOperation(operation, callback).HandleExceptions();
+        HandleOperation(operation, callback, packet).HandleExceptions();
     }
 
     /// <summary>
@@ -88,16 +85,16 @@ public sealed class BotInventoryController : BaseInventoryController
         callback?.Invoke(gstruct.ToResult());
     }
 
-    private async Task HandleOperation(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
+    private async Task HandleOperation(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback, InventoryPacket? packet = null)
     {
         if (_fikaBot.HealthController.IsAlive)
         {
             await Task.Yield();
         }
-        RunBotOperation(operation, callback);
+        RunBotOperation(operation, callback, packet);
     }
 
-    private void RunBotOperation(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
+    private void RunBotOperation(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback, InventoryPacket? packet = null)
     {
         var handler = _botInventoryOperationHandlerPool.Get();
         handler.Set(this, operation, callback);
@@ -105,6 +102,15 @@ public sealed class BotInventoryController : BaseInventoryController
         {
             if (CanExecute(operation))
             {
+                if (packet.HasValue)
+                {
+#if DEBUG
+                    FikaGlobals.LogInfo($"Sending bot operation {operation.GetType()} from {_fikaBot.Profile.Nickname}");
+#endif
+                    // Send before execution, whose callback may start another operation synchronously.
+                    var acceptedPacket = packet.Value;
+                    _fikaBot.PacketSender.NetworkManager.SendGenericPacket(in acceptedPacket, DeliveryMethod.ReliableOrdered, true);
+                }
                 // The handler stays rented until the operation's completion callback runs.
                 operation.Execute(handler.HandleResultDelegate);
                 return;
