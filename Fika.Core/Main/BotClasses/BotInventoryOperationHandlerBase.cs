@@ -33,12 +33,21 @@ public sealed class BotInventoryOperationHandler : IDisposable
 
     public void HandleResult(IResult result)
     {
-        if (result.Failed)
+        var controller = _inventoryController;
+        try
         {
-            FikaGlobals.LogWarning($"BotInventoryOperationHandler: Operation has failed! Controller: {_inventoryController.Name}, Operation ID: {Operation.Id}, Operation: {Operation}, Error: {result.Error}");
-        }
+            if (result.Failed)
+            {
+                FikaGlobals.LogWarning($"BotInventoryOperationHandler: Operation has failed! Controller: {controller.Name}, Operation ID: {Operation.Id}, Operation: {Operation}, Error: {result.Error}");
+            }
 
-        Callback?.Invoke(result);
+            Callback?.Invoke(result);
+        }
+        finally
+        {
+            // Keep the handler rented during callbacks that start another inventory operation.
+            controller.ReturnHandler(this);
+        }
     }
 
     public void Dispose()

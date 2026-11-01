@@ -105,15 +105,22 @@ public sealed class BotInventoryController : BaseInventoryController
         {
             if (CanExecute(operation))
             {
-                handler.Operation.Execute(handler.HandleResult);
+                // The handler stays rented until the operation's completion callback runs.
+                operation.Execute(handler.HandleResultDelegate);
                 return;
             }
-            handler.Operation.Dispose();
-            handler.Callback?.Fail($"Can't execute {handler.Operation}", 1);
+            operation.Dispose();
+            callback?.Fail($"Can't execute {operation}", 1);
+            ReturnHandler(handler);
         }
-        finally
+        catch
         {
-            _botInventoryOperationHandlerPool.ReturnHandler(handler);
+            // Execute may have completed synchronously and already returned the handler.
+            if (ReferenceEquals(handler.Operation, operation))
+            {
+                ReturnHandler(handler);
+            }
+            throw;
         }
     }
 
