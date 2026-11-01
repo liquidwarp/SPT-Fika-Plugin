@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <Authors>project-fika</Authors>
+    <ModName>Fika.Core</ModName>
+    <VersionPrefix>2.4.6</VersionPrefix>
+    <ForkMarker>lqw</ForkMarker>
+    <ForkRevision>1</ForkRevision>
+    <VersionSuffix>$(ForkMarker)-$(ForkRevision)</VersionSuffix>
+    <Version>$(VersionPrefix)-$(VersionSuffix)</Version>
+    <ReleaseDir>$(MSBuildThisFileDirectory)releases\$(Authors)-$(ModName)-$(Version)</ReleaseDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>None</DebugType>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+  </PropertyGroup>
+</Project>

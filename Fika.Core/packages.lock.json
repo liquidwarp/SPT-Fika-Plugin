@@ -21,12 +21,6 @@
           "Microsoft.NETFramework.ReferenceAssemblies.net461": "1.0.3"
         }
       },
-      "UnityEngine.Modules": {
-        "type": "Direct",
-        "requested": "[2022.3.43, )",
-        "resolved": "2022.3.43",
-        "contentHash": "O5ecnt8NqsoQ4gFbFETgTQX4J2x+iHz6UtBT4hgFe1YkDRJUXI8dspE3VRcy749mP9IkYNpjUcXmn4Y1w9tcXg=="
-      },
       "BepInEx.BaseLib": {
         "type": "Transitive",
         "resolved": "5.4.20",
