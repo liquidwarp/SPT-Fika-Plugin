@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
   <PropertyGroup>
-    <ModDir>BepInEx\plugins</ModDir>
+    <ModDir>BepInEx\plugins\Fika</ModDir>
     <InstallOnHeadless>True</InstallOnHeadless>
     <!-- build.ps1 uses the installed SPT assemblies; retain checked-in references for upstream CI. -->
     <ManagedPath Condition="'$(SPTPath)' != ''">$(SPTPath)\EscapeFromTarkov_Data\Managed</ManagedPath>
